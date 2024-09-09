@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>JOKABAR</title>
+    <link href="https://fonts.googleapis.com/css2?family=Reggae+One&family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <header>
+        <h1>JOKABAR</h1>
+        <p>Vernie's Expense Tracker</p>
+    </header>
+    <main>
+        <section id="expense-form">
+            <h2>Add Expense(s)</h2>
+            <form id="add-expense-form">
+                <div id="expense-items">
+                    <div class="expense-item-input">
+                        <input type="text" class="expense-name" placeholder="Expense Name" required>
+                        <input type="number" class="expense-amount" placeholder="Amount" required>
+                        <select class="expense-category" required>
+                            <option value="">Select Category</option>
+                            <option value="fuel">Fuel</option>
+                            <option value="maintenance">Maintenance</option>
+                            <option value="rent">Rent</option>
+                            <option value="other">Other</option>
+                        </select>
+                    </div>
+                </div>
+                <input type="date" id="expense-date" required>
+                <button type="button" id="add-item-btn">Add Another Item</button>
+                <button type="submit">Submit Expenses</button>
+            </form>
+        </section>
+        <section id="expense-list">
+            <h2>Expenses</h2>
+            <div id="date-filter">
+                <label for="start-date">From:</label>
+                <input type="date" id="start-date">
+                <label for="end-date">To:</label>
+                <input type="date" id="end-date">
+                <button id="filter-button">Filter</button>
+            </div>
+            <ul id="expenses"></ul>
+        </section>
+        <section id="summary">
+            <h2>Summary</h2>
+            <p>Total Expenses: <span id="total-expenses">$0.00</span></p>
+        </section>
+    </main>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="script.js"></script>
+</body>
+</html>
