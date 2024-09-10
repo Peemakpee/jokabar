@@ -14,6 +14,23 @@ document.addEventListener('DOMContentLoaded', () => {
     updateSummary();
 });
 
+const expenseRenderer = {
+    renderExpenseItem(expense) {
+        return `
+            <div>
+                <strong>${expense.name || 'Unknown'}</strong> - $${(expense.amount || 0).toFixed(2)}
+                <br>
+                <small>${expense.category || 'Uncategorized'} | ${expense.date || 'No date'}</small>
+            </div>
+            <button onclick="deleteExpense(${expense._id})">Delete</button>
+        `;
+    },
+
+    renderExpenseList(expenses) {
+        return expenses.map(this.renderExpenseItem).join('');
+    }
+};
+
 function addExpenseItem() {
     const expenseItems = document.getElementById('expense-items');
     const newItem = document.createElement('div');
@@ -41,16 +58,22 @@ function addExpenses(e) {
     e.preventDefault();
 
     const date = document.getElementById('expense-date').value;
-    const expenseItem = document.querySelector('.expense-item-input');
+    const expenseItems = document.querySelectorAll('.expense-item-input');
+    const items = Array.from(expenseItems).map(item => ({
+        name: item.querySelector('.expense-name').value.trim(),
+        amount: parseFloat(item.querySelector('.expense-amount').value),
+        category: item.querySelector('.expense-category').value
+    }));
+
     const newExpense = {
-        name: expenseItem.querySelector('.expense-name').value.trim(),
-        amount: parseFloat(expenseItem.querySelector('.expense-amount').value),
-        category: expenseItem.querySelector('.expense-category').value,
-        date: date || new Date().toISOString().split('T')[0]
+        date: date || new Date().toISOString().split('T')[0],
+        items: items
     };
 
-    if (!newExpense.name || isNaN(newExpense.amount) || !newExpense.category) {
-        alert('Please enter a valid expense.');
+    console.log('Sending expense data:', newExpense); // Add this line
+
+    if (items.some(item => !item.name || isNaN(item.amount) || !item.category)) {
+        alert('Please enter valid expenses.');
         return;
     }
 
@@ -66,46 +89,53 @@ function addExpenses(e) {
             e.target.reset();
         },
         error: function(xhr, status, error) {
-            console.error('Error:', error);
-            alert('Failed to add expense. Please try again.');
+            console.error('Error:', xhr.responseText);
+            alert('Failed to add expenses. Please try again.');
         }
     });
 }
 
 function renderExpenses(filteredExpenses = expenses) {
     const expensesList = document.getElementById('expenses');
-    expensesList.innerHTML = '';
-
-    if (!Array.isArray(filteredExpenses)) {
-        console.error('filteredExpenses is not an array:', filteredExpenses);
-        return;
-    }
-
-    filteredExpenses.forEach((expense, index) => {
-        if (!expense || typeof expense !== 'object') {
-            console.error('Invalid expense object:', expense);
-            return;
-        }
-
-        const li = document.createElement('li');
-        li.className = 'expense-item';
-        li.innerHTML = `
+    expensesList.innerHTML = filteredExpenses.map(expense => {
+        const formattedDate = new Date(expense.date).toLocaleDateString('en-US', {
+            year: 'numeric',
+            month: 'long',
+            day: 'numeric'
+        });
+        return `
+        <li class="expense-item">
             <div>
-                <strong>${expense.name || 'Unknown'}</strong> - $${(expense.amount || 0).toFixed(2)}
-                <br>
-                <small>${expense.category || 'Uncategorized'} | ${expense.date || 'No date'}</small>
+                <strong>${formattedDate}</strong>
+                ${Array.isArray(expense.items) ? expense.items.map(item => `
+                    <div>
+                        <strong>${item.name || 'Unknown'}</strong> - $${(item.amount || 0).toFixed(2)}
+                        <br>
+                        <small>${item.category || 'Uncategorized'}</small>
+                    </div>
+                `).join('') : `<div>No items</div>`}
             </div>
-            <button onclick="deleteExpense(${index})">Delete</button>
-        `;
-        expensesList.appendChild(li);
-    });
+            <button onclick="deleteExpense('${expense._id}')">Delete</button>
+        </li>
+    `}).join('');
 }
 
-function deleteExpense(index) {
-    expenses.splice(index, 1);
-    saveExpenses();
-    renderExpenses();
-    updateSummary();
+function deleteExpense(expenseId) {
+    if (confirm('Are you sure you want to delete this expense?')) {
+        $.ajax({
+            url: `/api/expenses/${expenseId}`,
+            type: 'DELETE',
+            success: function() {
+                expenses = expenses.filter(expense => expense._id !== expenseId);
+                renderExpenses();
+                updateSummary();
+            },
+            error: function(xhr, status, error) {
+                console.error('Error deleting expense:', error);
+                alert('Failed to delete expense. Please try again.');
+            }
+        });
+    }
 }
 
 function filterExpenses() {
@@ -121,8 +151,10 @@ function filterExpenses() {
 }
 
 function updateSummary(expensesToSum = expenses) {
-    const totalExpenses = expensesToSum.reduce((total, expense) => total + expense.amount, 0);
-    document.getElementById('total-expenses').textContent = `$${totalExpenses.toFixed(2)}`;
+    const totalExpenses = expensesToSum.reduce((total, expense) => {
+        return total + expense.items.reduce((itemTotal, item) => itemTotal + item.amount, 0);
+    }, 0);
+    document.getElementById('total-expenses').textContent = `₱${totalExpenses.toFixed(2)}`;
 }
 
 function saveExpenses() {
@@ -134,6 +166,7 @@ function loadExpenses() {
         url: '/api/expenses',
         type: 'GET',
         success: function(data) {
+            console.log('Received expense data:', data);  // Add this line for debugging
             expenses = Array.isArray(data) ? data : [];
             renderExpenses();
             updateSummary();
@@ -141,6 +174,23 @@ function loadExpenses() {
         error: function(xhr, status, error) {
             console.error('Error:', error);
             alert('Failed to load expenses. Please refresh the page.');
+        }
+    });
+}
+
+function loadCategories() {
+    $.ajax({
+        url: '/api/categories',
+        type: 'GET',
+        success: function(categories) {
+            const categorySelect = document.querySelector('.expense-category');
+            categorySelect.innerHTML = '<option value="">Select Category</option>';
+            categories.forEach(category => {
+                categorySelect.innerHTML += `<option value="${category._id}">${category.name}</option>`;
+            });
+        },
+        error: function(xhr, status, error) {
+            console.error('Error loading categories:', error);
         }
     });
 }
