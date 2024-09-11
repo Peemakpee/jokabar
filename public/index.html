@@ -1,23 +1,21 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>JOKABAR</title>
-    <link href="https://fonts.googleapis.com/css2?family=Reggae+One&family=Roboto:wght@400;700&display=swap"
-        rel="stylesheet">
+    <title>JOKABAR - Expense Tracker</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.1.1/css/all.min.css">
     <link rel="stylesheet" href="styles.css">
 </head>
-
 <body>
     <header>
-        <h1>JOKABAR</h1>
+        <h1><i class="fas fa-coins"></i> JOKABAR</h1>
         <p>Vernie's Expense Tracker</p>
     </header>
     <main>
-        <section id="expense-form">
-            <h2>Add Expense(s)</h2>
+        <section id="expense-form" class="card">
+            <h2><i class="fas fa-plus-circle"></i> Add Expense(s)</h2>
             <form id="add-expense-form">
                 <div id="expense-items">
                     <div class="expense-item-input">
@@ -33,28 +31,46 @@
                     </div>
                 </div>
                 <input type="date" id="expense-date" required>
-                <button type="button" id="add-item-btn">Add Another Item</button>
-                <button type="submit">Submit Expenses</button>
+                <button type="button" id="add-item-btn" class="btn-secondary"><i class="fas fa-plus"></i> Add Another Item</button>
+                <button type="submit" class="btn-primary"><i class="fas fa-save"></i> Submit Expenses</button>
             </form>
         </section>
-        <section id="expense-list">
-            <h2>Expenses</h2>
+        <section id="expense-list" class="card">
+            <h2><i class="fas fa-list"></i> Expenses</h2>
             <div id="date-filter">
                 <label for="start-date">From:</label>
                 <input type="date" id="start-date">
                 <label for="end-date">To:</label>
                 <input type="date" id="end-date">
-                <button id="filter-button">Filter</button>
+                <button id="filter-button" class="btn-secondary"><i class="fas fa-filter"></i> Filter</button>
             </div>
             <ul id="expenses"></ul>
         </section>
-        <section id="summary">
-            <h2>Summary</h2>
+        <section id="summary" class="card">
+            <h2><i class="fas fa-chart-pie"></i> Summary</h2>
             <p>Total Expenses: <span id="total-expenses">$0.00</span></p>
         </section>
     </main>
+    <div id="successModal" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <p id="modalMessage"></p>
+        </div>
+    </div>
+    <div id="deleteModal" class="modal">
+        <div class="modal-content">
+            <h3>Confirm Deletion</h3>
+            <p>Are you sure you want to delete this expense?</p>
+            <button id="confirmDelete" class="btn-primary">Delete</button>
+            <button id="cancelDelete" class="btn-secondary">Cancel</button>
+        </div>
+    </div>
+    <div id="editModal" class="modal">
+        <div class="modal-content">
+            <!-- Content will be dynamically populated -->
+        </div>
+    </div>
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="script.js"></script>
 </body>
-
 </html>
