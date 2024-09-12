@@ -275,13 +275,20 @@ function updateExpense(expenseId) {
 }
 
 function submitUpdateExpense(expenseId) {
-    const date = document.getElementById('expense-date').value;
-    const expenseItems = document.querySelectorAll('.expense-item-input');
-    const items = Array.from(expenseItems).map(item => ({
-        name: item.querySelector('.expense-name').value.trim(),
-        amount: parseFloat(item.querySelector('.expense-amount').value),
-        category: item.querySelector('.expense-category').value
-    }));
+    const date = document.getElementById('edit-expense-date').value;
+    const expenseItems = document.querySelectorAll('#edit-expense-items .expense-item-input');
+    const items = Array.from(expenseItems)
+        .map(item => ({
+            name: item.querySelector('.expense-name').value.trim(),
+            amount: parseFloat(item.querySelector('.expense-amount').value),
+            category: item.querySelector('.expense-category').value
+        }))
+        .filter(item => item.name && !isNaN(item.amount) && item.category); // Filter out invalid items
+
+    if (items.length === 0) {
+        showModal('Please enter at least one valid expense item.');
+        return;
+    }
 
     const updatedExpense = {
         date: date,
@@ -300,11 +307,11 @@ function submitUpdateExpense(expenseId) {
             }
             renderExpenses();
             updateSummary();
-            resetForm();
+            showModal('Expense updated successfully!');
         },
         error: function (xhr, status, error) {
             console.error('Error:', xhr.responseText);
-            alert('Failed to update expense. Please try again.');
+            showModal('Failed to update expense. Please try again.');
         }
     });
 }
@@ -577,6 +584,7 @@ function addEditExpenseItem() {
                 expenses = expenses.filter(expense => expense._id !== expenseId);
                 renderExpenses();
                 updateSummary();
+                resetForm();
                 showModal('Expense deleted successfully!');
             },
             error: function (xhr, status, error) {
